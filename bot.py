@@ -3,10 +3,12 @@ from telebot import types
 import time
 import traceback
 import os
+import sys
 from keep_alive import keep_alive
 
 keep_alive()
 
+# Токен берется из переменных окружения (НОВЫЙ ТОКЕН)
 token = os.environ['BOT_TOKEN']
 bot = telebot.TeleBot(token)
 
@@ -556,20 +558,28 @@ if __name__ == "__main__":
         print("=" * 60)
         
         # Очищаем webhook перед запуском polling
-        bot.remove_webhook()
-        time.sleep(2)
+        try:
+            bot.remove_webhook()
+            print("✅ Webhook очищен")
+        except:
+            pass
         
-        # Запускаем polling с skip_pending
+        time.sleep(3)  # Задержка 3 секунды
+        
+        # Запускаем polling БЕЗ skip_pending
+        print("🔄 Запуск polling с новым токеном...")
         bot.polling(
             none_stop=True,
-            interval=1,
-            timeout=30,
-            skip_pending=True  # ОЧЕНЬ ВАЖНО! Пропускаем ожидающие обновления
+            interval=2,
+            timeout=30
         )
         
     except KeyboardInterrupt:
         print("\n🛑 Бот остановлен")
     except Exception as e:
-        print(f"\n⚠️ Критическая ошибка в боте: {e}")
+        print(f"\n⚠️ Ошибка: {e}")
         print(traceback.format_exc())
-        print("❌ Бот остановлен из-за ошибки")
+        print("⏳ Перезапуск через 10 секунд...")
+        time.sleep(10)
+        # Автоперезапуск
+        os.execv(sys.executable, ['python'] + sys.argv)
