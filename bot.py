@@ -7,6 +7,13 @@ import sys
 from keep_alive import keep_alive
 
 keep_alive()
+print("=" * 60)
+print("🚀 СТАРТ БОТА НА RENDER")
+print(f"📅 Время: {time.ctime()}")
+print(f"🐍 Версия Python: {sys.version}")
+print(f"🔑 Токен установлен: {'ДА' if 'BOT_TOKEN' in os.environ else 'НЕТ'}")
+print(f"🌐 PORT: {os.environ.get('PORT', '8080 (default)')}")
+print("=" * 60)
 
 # Токен берется из переменных окружения (НОВЫЙ ТОКЕН)
 token = os.environ['BOT_TOKEN']
@@ -547,40 +554,54 @@ def show_all_stores(message):
 
 # Запускаем бот
 if __name__ == "__main__":
+    # Принудительный вывод логов
+    sys.stdout.flush()
+    sys.stderr.flush()
+    
     try:
         set_bot_commands()  # Устанавливаем команды меню
         print("=" * 60)
         print("🤖 БОТ СЛУЖБЫ ОХРАНЫ ТРУДА ЗАПУЩЕН")
         print(f"👑 Админ ID: {ADMIN_ID}")
         print(f"🏪 Магазинов в базе: {len(stores)}")
-        print("📱 Версия: 1.3 (версия на Render)")
+        print("📱 Версия: 1.3 (стабильная версия на Render)")
         print("🌐 Flask сервер запущен для keep-alive")
+        print("🕒 Ожидание запуска polling...")
         print("=" * 60)
+        
+        # Принудительный flush
+        sys.stdout.flush()
         
         # Очищаем webhook перед запуском polling
         try:
             bot.remove_webhook()
             print("✅ Webhook очищен")
-        except:
-            pass
+            sys.stdout.flush()
+        except Exception as e:
+            print(f"⚠️ Не удалось очистить webhook: {e}")
+            sys.stdout.flush()
         
-        time.sleep(3)  # Задержка 3 секунды
+        time.sleep(2)  # Короткая задержка
         
         # Запускаем polling БЕЗ skip_pending
-        print("🔄 Запуск polling с новым токеном...")
+        print("🔄 Запуск polling...")
+        sys.stdout.flush()
+        
         bot.polling(
             none_stop=True,
             interval=2,
-            timeout=30
+            timeout=30,
+            logger_level="INFO"  # Добавляем логирование
         )
         
     except KeyboardInterrupt:
         print("\n🛑 Бот остановлен")
+        sys.stdout.flush()
     except Exception as e:
         print(f"\n⚠️ Ошибка: {e}")
         print(traceback.format_exc())
+        sys.stdout.flush()
         print("⏳ Перезапуск через 10 секунд...")
         time.sleep(10)
         # Автоперезапуск
         os.execv(sys.executable, ['python'] + sys.argv)
-
